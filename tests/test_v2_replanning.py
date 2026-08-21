@@ -11,7 +11,9 @@ class TestReplanning:
 
     def test_resource_unavailable_triggers_reallocation(self):
         manager = FlowShieldV2Manager()
-        initial_assignments = {a.resource_id: a.incident_id for a in manager.optimization_result.assignments}
+        initial_assignments = {
+            a.resource_id: a.incident_id for a in manager.optimization_result.assignments
+        }
 
         # Check that crew-alpha was initially assigned
         assert "crew-alpha" in initial_assignments
@@ -35,7 +37,9 @@ class TestReplanning:
         manager = FlowShieldV2Manager()
 
         # Ingest urgent report with 45 trapped people
-        res = manager.execute_input("45 people are trapped in the basement of Metro Station in W12-C")
+        res = manager.execute_input(
+            "45 people are trapped in the basement of Metro Station in W12-C"
+        )
         assert res["status"] == "success"
         assert res["intent"] == "incident"
 

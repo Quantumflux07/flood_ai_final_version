@@ -30,7 +30,7 @@ from src.models.action import ActionStatus
 from src.models.event import RawEvent, RawEventType
 from src.models.evidence import Evidence, EvidenceSource
 from src.models.incident import IncidentStatus, SeverityLevel
-from src.models.resource import ResourceStatus, ResourceType
+from src.models.resource import ResourceStatus
 from src.models.situation import ZoneSeverity
 from src.reasoning.reasoning_layer import GraniteReasoningLayer
 from src.workflow.scenario_ward12 import (

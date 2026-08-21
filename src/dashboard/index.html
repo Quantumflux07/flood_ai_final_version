@@ -1,218 +1,891 @@
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FlowShield Command Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>FLOWSHIELD V2 — Decision Support & Emergency Coordination</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-fixed-dim": "#bec6e0",
+                        "on-tertiary-container": "#b47300",
+                        "background": "#051424",
+                        "secondary-container": "#a40217",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "surface-dim": "#051424",
+                        "tertiary-container": "#251400",
+                        "outline": "#909097",
+                        "surface": "#051424",
+                        "on-secondary-container": "#ffaea8",
+                        "secondary-fixed": "#ffdad7",
+                        "secondary-fixed-dim": "#ffb3ad",
+                        "on-surface": "#d4e4fa",
+                        "secondary": "#ffb3ad",
+                        "outline-variant": "#45464d",
+                        "inverse-surface": "#d4e4fa",
+                        "tertiary": "#ffb95f",
+                        "on-secondary": "#68000a",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-surface-variant": "#c6c6cd",
+                        "on-tertiary": "#472a00",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-secondary-fixed-variant": "#930013",
+                        "on-error-container": "#ffdad6",
+                        "inverse-on-surface": "#233143",
+                        "surface-container-lowest": "#010f1f",
+                        "on-secondary-fixed": "#410004",
+                        "surface-variant": "#273647",
+                        "error-container": "#93000a",
+                        "primary-fixed": "#dae2fd",
+                        "on-primary-container": "#798098",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "primary": "#bec6e0",
+                        "on-primary-fixed": "#131b2e",
+                        "surface-tint": "#bec6e0",
+                        "on-primary": "#283044",
+                        "on-primary-fixed-variant": "#3f465c",
+                        "surface-container-highest": "#273647",
+                        "on-tertiary-fixed": "#2a1700",
+                        "primary-container": "#0f172a",
+                        "surface-container-low": "#0d1c2d",
+                        "surface-bright": "#2c3a4c",
+                        "surface-container": "#122131",
+                        "surface-container-high": "#1c2b3c",
+                        "inverse-primary": "#565e74",
+                        "on-background": "#d4e4fa",
+                        "simulation-accent": "#a855f7"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "margin-page": "24px",
+                        "stack-default": "12px",
+                        "stack-tight": "4px",
+                        "gutter": "16px",
+                        "container-padding": "12px",
+                        "unit": "4px"
+                    },
+                    fontFamily: {
+                        "headline-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "data-mono": ["JetBrains Mono"],
+                        "label-caps": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-mono": ["13px", { "lineHeight": "16px", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "label-caps": ["11px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["30px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        .sim-glow { box-shadow: inset 0 0 0 2px theme('colors.simulation-accent'); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: theme('colors.surface-container-lowest'); }
+        ::-webkit-scrollbar-thumb { background: theme('colors.surface-variant'); border-radius: theme('borderRadius.full'); }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.outline'); }
+        .tab-btn.active {
+            color: #bec6e0;
+            border-bottom: 2px solid #bec6e0;
+        }
+        .tab-btn:not(.active) {
+            color: #c6c6cd;
+            border-bottom: 2px solid transparent;
+        }
+    </style>
 </head>
-<body class="dark-theme">
-    <div class="glow-container"></div>
-    
-    <header class="app-header">
-        <div class="header-left">
-            <div class="logo-area">
-                <span class="logo-shield">🛡️</span>
-                <div class="logo-text">
-                    <h1>FLOWSHIELD</h1>
-                    <p>Decision Support & Situation Command</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="header-center">
-            <div class="stat-badge" id="system-status-container">
-                <span class="pulse-indicator status-normal" id="status-pulse"></span>
-                <span class="status-label">SYSTEM SEVERITY:</span>
-                <span class="status-value" id="overall-severity-badge">NORMAL</span>
-            </div>
-        </div>
-        
-        <div class="header-right">
-            <button id="reset-scenario-btn" class="btn btn-secondary">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                Reset Scenario
-            </button>
-            <span class="city-location">📍 <span id="current-city">AHMEDABAD</span></span>
-        </div>
-    </header>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col antialiased">
 
-    <main class="dashboard-grid">
-        <!-- FIRST COLUMN: Ingestion Timeline & Manual Reporter -->
-        <section class="grid-card col-span-3" id="timeline-card">
-            <div class="card-header">
-                <h2>Citizen Incident Agent</h2>
-                <span class="card-subtitle">Real-time parser</span>
+<!-- Top Navigation Bar -->
+<header class="flex justify-between items-center w-full px-margin-page h-16 z-50 bg-surface-container-lowest border-b border-outline-variant sticky top-0 flex-shrink-0">
+    <div class="flex items-center gap-6">
+        <h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tighter uppercase flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[26px]">shield</span>
+            FLOWSHIELD V2
+        </h1>
+        <nav class="hidden md:flex items-center gap-6 h-full pt-1">
+            <button id="nav-live" onclick="switchTab('live')" class="tab-btn active font-label-caps text-label-caps uppercase py-4 transition-colors">
+                Live Status
+            </button>
+            <button id="nav-incidents" onclick="switchTab('incidents')" class="tab-btn font-label-caps text-label-caps uppercase py-4 transition-colors">
+                Incidents
+            </button>
+            <button id="nav-resources" onclick="switchTab('resources')" class="tab-btn font-label-caps text-label-caps uppercase py-4 transition-colors">
+                Resources
+            </button>
+            <button id="nav-simulation" onclick="switchTab('simulation')" class="tab-btn font-label-caps text-label-caps uppercase py-4 transition-colors flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[15px] text-simulation-accent">science</span>
+                Simulation
+            </button>
+            <button id="nav-history" onclick="switchTab('history')" class="tab-btn font-label-caps text-label-caps uppercase py-4 transition-colors">
+                History
+            </button>
+        </nav>
+    </div>
+    <div class="flex items-center gap-4">
+        <button onclick="resetScenario()" title="Reset Scenario State" class="px-3 py-1.5 bg-surface-container border border-outline-variant rounded font-label-caps text-label-caps text-on-surface-variant hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+            RESET SCENARIO
+        </button>
+        <div class="flex items-center gap-1">
+            <button onclick="refreshState()" title="Refresh Data" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded transition-colors">
+                <span id="refresh-icon" class="material-symbols-outlined text-[20px]">sync</span>
+            </button>
+            <button title="Notifications" class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded transition-colors relative">
+                <span class="material-symbols-outlined text-[20px]">notifications</span>
+                <span id="alert-badge" class="hidden absolute top-1 right-1 w-2 h-2 rounded-full bg-error animate-ping"></span>
+            </button>
+        </div>
+        <div class="w-8 h-8 rounded-full border border-outline-variant overflow-hidden bg-surface-container-highest flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-[20px]">support_agent</span>
+        </div>
+    </div>
+</header>
+
+<div class="flex flex-1 overflow-hidden relative">
+    <!-- SideNavBar -->
+    <aside class="hidden lg:flex flex-col h-[calc(100vh-64px)] py-stack-default bg-surface-container w-[260px] border-r border-outline-variant shrink-0 z-40">
+        <div class="px-container-padding mb-6 flex items-center gap-3">
+            <div class="w-10 h-10 rounded bg-primary-container flex items-center justify-center border border-primary">
+                <span class="material-symbols-outlined text-primary">power</span>
             </div>
-            
-            <div class="reporter-panel">
-                <h3>Report New Incident</h3>
-                <p class="panel-instructions">Simulate citizen voice/text input to Granite AI.</p>
-                <div class="preset-buttons">
-                    <button class="preset-btn" data-text="Severe rainfall in Ward 12 Central. Water is waist-deep near Ahmedabad Hospital, roads are completely blocked!">🏥 Hospital Crisis (W12-C)</button>
-                    <button class="preset-btn" data-text="North school street drainage is fully clogged by trash. Water is about a meter high, flooding nearby yards.">🏫 School Flooding (W12-N)</button>
-                    <button class="preset-btn" data-text="Moderate rain in Ward 12 South. Water logging on industrial roads, cars are unable to pass.">🏭 Industrial blockage (W12-S)</button>
+            <div>
+                <h2 class="font-headline-sm text-headline-sm font-bold text-primary">System Core</h2>
+                <p id="core-status" class="font-body-sm text-body-sm text-[#10b981] flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse"></span> Operational
+                </p>
+            </div>
+        </div>
+        <nav class="flex-1 px-2 space-y-1">
+            <div class="px-3 py-2 rounded text-on-surface-variant flex items-center justify-between group bg-surface-container-low border border-outline-variant/30">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">psychology</span>
+                    <span class="font-label-caps text-label-caps uppercase">Grok Gateway</span>
                 </div>
-                <div class="input-group">
-                    <textarea id="report-input-text" placeholder="Type a raw incident report... (e.g., 'Heavy flooding in school lane, water-logging is high')"></textarea>
-                    <div class="input-controls">
-                        <select id="zone-hint-select">
-                            <option value="">No Zone Hint (Auto-Detect)</option>
-                            <option value="W12-N">W12-N (North Sub-Ward)</option>
-                            <option value="W12-C">W12-C (Central Sub-Ward)</option>
-                            <option value="W12-S">W12-S (South Sub-Ward)</option>
-                            <option value="DEPOT">DEPOT (Resource Depot)</option>
-                        </select>
-                        <button id="submit-report-btn" class="btn btn-primary">
-                            <span class="btn-spinner hidden"></span>
-                            Ingest Incident
+                <span id="grok-pill" class="font-data-mono text-[10px] px-1.5 py-0.5 rounded bg-primary-container text-primary">Active</span>
+            </div>
+            <div class="px-3 py-2 rounded text-on-surface-variant flex items-center justify-between group bg-surface-container-low border border-outline-variant/30">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-tertiary">settings_input_component</span>
+                    <span class="font-label-caps text-label-caps uppercase">Decision Engine</span>
+                </div>
+                <span class="font-data-mono text-[10px] px-1.5 py-0.5 rounded bg-tertiary-container text-tertiary">Online</span>
+            </div>
+            <div class="px-3 py-2 rounded text-on-surface-variant flex items-center justify-between group bg-surface-container-low border border-outline-variant/30">
+                <div class="flex items-center gap-3">
+                    <span class="material-symbols-outlined text-primary">query_stats</span>
+                    <span class="font-label-caps text-label-caps uppercase">Optimizer</span>
+                </div>
+                <span class="font-data-mono text-[10px] px-1.5 py-0.5 rounded bg-primary-container text-primary">Greedy V2</span>
+            </div>
+        </nav>
+        <div class="px-container-padding mt-auto space-y-3">
+            <button onclick="openEmergencyModal()" class="w-full py-2.5 bg-error text-on-error font-label-caps text-label-caps uppercase rounded border border-error-container hover:bg-error-container hover:text-on-error-container transition-colors shadow-sm flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">warning</span>
+                Emergency Dispatch
+            </button>
+            <div class="pt-3 border-t border-outline-variant flex justify-between text-on-surface-variant font-label-caps text-[11px]">
+                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">location_city</span> Ward 12</span>
+                <span id="sidebar-time" class="font-data-mono text-[11px]">--:-- UTC</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN VIEW CONTAINER -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-surface-dim relative">
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- TAB 1: LIVE STATUS / COMMAND WORKSPACE                              -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div id="view-live" class="tab-view flex-1 p-gutter flex flex-col gap-gutter">
+            <!-- Top Section: Input & Status -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                <!-- LEFT: Input Panel -->
+                <div class="lg:col-span-8 bg-surface-container border border-outline-variant rounded flex flex-col p-container-padding">
+                    <div class="mb-3 flex justify-between items-start">
+                        <div>
+                            <h2 class="font-headline-sm text-headline-sm text-primary mb-1">What is happening?</h2>
+                            <p class="font-body-sm text-body-sm text-on-surface-variant">Type incident reports, resource availability updates, weather status, or operational queries.</p>
+                        </div>
+                        <span id="input-source-tag" class="font-data-mono text-[11px] px-2 py-0.5 rounded bg-surface-container-highest text-primary border border-outline-variant">AI Ready</span>
+                    </div>
+                    <textarea id="live-command-input" class="w-full bg-surface-container-lowest border border-outline-variant rounded p-3 text-on-background font-body-md focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none h-28 mb-3" placeholder="e.g. 37 people are trapped near the civil hospital in W12-C, water depth 1.8m..."></textarea>
+                    
+                    <div class="flex justify-between items-center mb-5">
+                        <div class="flex items-center gap-2">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Zone Hint:</span>
+                            <select id="live-zone-hint" class="bg-surface-container-lowest border border-outline-variant rounded text-data-mono text-body-sm px-2 py-1 focus:border-primary">
+                                <option value="">Auto-Detect</option>
+                                <option value="W12-C">W12-C (Central)</option>
+                                <option value="W12-N">W12-N (North)</option>
+                                <option value="W12-S">W12-S (South)</option>
+                            </select>
+                        </div>
+                        <button id="btn-analyze" onclick="handleCommandSubmit()" class="bg-primary text-on-primary font-label-caps text-label-caps px-6 py-2.5 rounded hover:bg-primary-fixed transition-colors flex items-center gap-2 shadow">
+                            <span id="btn-analyze-text">ANALYZE & DISPATCH</span>
+                            <span class="material-symbols-outlined text-[16px]">troubleshoot</span>
+                        </button>
+                    </div>
+
+                    <div>
+                        <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-2.5 border-b border-outline-variant pb-1">TRY A SCENARIO</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                            <button onclick="setScenarioText('37 people trapped near the hospital in W12-C, road is blocked', 'W12-C')" class="bg-surface-container-low border border-outline-variant rounded p-2.5 text-left hover:border-primary hover:bg-surface-container-highest transition-all group flex items-start gap-2">
+                                <span class="material-symbols-outlined text-secondary mt-0.5">water_drop</span>
+                                <div>
+                                    <span class="block font-data-mono text-data-mono text-secondary mb-0.5 group-hover:text-secondary-fixed">SCENARIO_01</span>
+                                    <span class="font-body-sm text-body-sm text-on-surface">37 people trapped near hospital in W12-C, road blocked.</span>
+                                </div>
+                            </button>
+                            <button onclick="setScenarioText('Rescue Crew Alpha is unavailable due to mechanical failure')" class="bg-surface-container-low border border-outline-variant rounded p-2.5 text-left hover:border-primary hover:bg-surface-container-highest transition-all group flex items-start gap-2">
+                                <span class="material-symbols-outlined text-error mt-0.5">engineering</span>
+                                <div>
+                                    <span class="block font-data-mono text-data-mono text-error mb-0.5 group-hover:text-error">SCENARIO_02</span>
+                                    <span class="font-body-sm text-body-sm text-on-surface">Rescue Crew Alpha is unavailable due to mechanical failure.</span>
+                                </div>
+                            </button>
+                            <button onclick="setScenarioText('Rainfall increased to 140 mm/hr in W12-N, water level 2.0m', 'W12-N')" class="bg-surface-container-low border border-outline-variant rounded p-2.5 text-left hover:border-primary hover:bg-surface-container-highest transition-all group flex items-start gap-2">
+                                <span class="material-symbols-outlined text-tertiary mt-0.5">thunderstorm</span>
+                                <div>
+                                    <span class="block font-data-mono text-data-mono text-tertiary mb-0.5 group-hover:text-tertiary-fixed">SCENARIO_03</span>
+                                    <span class="font-body-sm text-body-sm text-on-surface">Rainfall increased to 140 mm/hr in W12-N, water level 2.0m.</span>
+                                </div>
+                            </button>
+                            <button onclick="setScenarioText('Which incident is most urgent?')" class="bg-surface-container-low border border-outline-variant rounded p-2.5 text-left hover:border-primary hover:bg-surface-container-highest transition-all group flex items-start gap-2">
+                                <span class="material-symbols-outlined text-primary mt-0.5">help</span>
+                                <div>
+                                    <span class="block font-data-mono text-data-mono text-primary mb-0.5 group-hover:text-primary-fixed">SCENARIO_04</span>
+                                    <span class="font-body-sm text-body-sm text-on-surface">Query: Which incident is most urgent?</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Operational Status Summary -->
+                <div class="lg:col-span-4 bg-surface-container border border-outline-variant rounded flex flex-col p-container-padding">
+                    <div class="flex justify-between items-center mb-4 border-b border-outline-variant pb-2">
+                        <h2 class="font-headline-sm text-headline-sm text-primary">Operational Status</h2>
+                        <span class="flex items-center gap-1 font-label-caps text-label-caps text-secondary"><span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span> LIVE</span>
+                    </div>
+                    <div class="space-y-3 flex-1">
+                        <div class="bg-surface-container-lowest border border-outline-variant rounded p-3 flex justify-between items-center">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">ACTIVE INCIDENTS</span>
+                            <span id="stat-active-incidents" class="font-data-mono text-data-mono text-on-surface text-xl font-bold">3</span>
+                        </div>
+                        <div class="bg-secondary-container border border-error rounded p-3 flex justify-between items-center relative overflow-hidden">
+                            <span class="font-label-caps text-label-caps text-on-error relative z-10 flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">warning</span> P1 CRITICAL
+                            </span>
+                            <span id="stat-p1-critical" class="font-data-mono text-data-mono text-on-error font-bold text-xl relative z-10">1</span>
+                        </div>
+                        <div class="bg-surface-container-lowest border border-outline-variant rounded p-3 flex justify-between items-center">
+                            <span class="font-label-caps text-label-caps text-tertiary">PEOPLE AT RISK</span>
+                            <span id="stat-people-risk" class="font-data-mono text-data-mono text-tertiary text-xl font-bold">4,220</span>
+                        </div>
+                        <div class="bg-surface-container-lowest border border-outline-variant rounded p-3 flex justify-between items-center">
+                            <span class="font-label-caps text-label-caps text-primary">DEPLOYED / ASSIGNED</span>
+                            <span id="stat-deployed-res" class="font-data-mono text-data-mono text-primary text-xl font-bold">3 / 5</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTTOM: Dynamic Decision Engine Panel -->
+            <div id="live-decision-panel" class="bg-surface-container border border-outline-variant rounded flex flex-col p-container-padding">
+                <div class="flex justify-between items-center mb-3 border-b border-outline-variant pb-2">
+                    <h2 class="font-headline-sm text-headline-sm text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined">memory</span> DECISION ENGINE RESPONSE
+                    </h2>
+                    <span id="live-decision-source" class="font-data-mono text-[11px] text-on-surface-variant">FlowShield V2 Core</span>
+                </div>
+                <div id="live-decision-content" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Left: Understanding -->
+                    <div class="bg-surface-container-low border border-outline-variant rounded p-3">
+                        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase block mb-1">1. Understanding & Intent</span>
+                        <div id="live-intent-box" class="space-y-1 font-body-sm text-body-sm text-on-surface">
+                            <p><span class="text-on-surface-variant">Status:</span> <span class="text-primary font-bold">READY</span></p>
+                            <p><span class="text-on-surface-variant">Domain:</span> Urban Flood Response</p>
+                            <p class="text-on-surface-variant text-xs mt-2">Enter input above to analyze through Grok Gateway & validation gate.</p>
+                        </div>
+                    </div>
+                    <!-- Center: Allocations -->
+                    <div class="bg-surface-container-low border border-outline-variant rounded p-3">
+                        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase block mb-1">2. Resource Allocations</span>
+                        <div id="live-alloc-box" class="space-y-1.5 font-data-mono text-[12px]">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <!-- Right: Response Plan -->
+                    <div class="bg-surface-container-low border border-outline-variant rounded p-3">
+                        <span class="font-label-caps text-label-caps text-on-surface-variant uppercase block mb-1">3. Action Plan</span>
+                        <div id="live-plan-box" class="space-y-1 font-body-sm text-body-sm text-on-surface">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transparency Footer -->
+            <div class="flex justify-between items-center bg-surface-container-lowest border border-outline-variant rounded px-3 py-2 mt-auto">
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 border-r border-outline-variant pr-4">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_8px_#ffb3ad]"></span>
+                        <span class="font-label-caps text-label-caps text-secondary">SYSTEM LIVE</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-on-surface-variant font-label-caps text-label-caps">
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">psychology</span> Grok</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">settings_input_component</span> Engine</span>
+                        <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">query_stats</span> Optimizer</span>
+                    </div>
+                </div>
+                <span id="footer-time" class="font-data-mono text-data-mono text-on-surface-variant text-xs">SYS_TIME: --:--:--Z</span>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- TAB 2: INCIDENTS & DECISIONS VIEW                                   -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div id="view-incidents" class="tab-view hidden flex-1 flex flex-col xl:flex-row overflow-hidden bg-background">
+            <!-- Center Canvas -->
+            <div class="flex-1 overflow-y-auto p-margin-page space-y-stack-default">
+                <!-- 1. INPUT UNDERSTANDING -->
+                <section class="bg-surface-container-low border border-outline-variant rounded p-container-padding">
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant">
+                        <h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">data_object</span>
+                            Input Understanding
+                        </h3>
+                        <div class="flex items-center gap-3">
+                            <span id="inc-source-tag" class="bg-surface-container-highest px-2 py-0.5 rounded text-primary font-data-mono text-data-mono">Source: Grok</span>
+                            <span id="inc-conf-tag" class="bg-surface-container-highest px-2 py-0.5 rounded text-tertiary font-data-mono text-data-mono">Conf: 94%</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-gutter">
+                        <div class="flex flex-col gap-1">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Intent</span>
+                            <span id="inc-intent-val" class="font-data-mono text-data-mono text-on-surface">Incident Report</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Domain</span>
+                            <span class="font-data-mono text-data-mono text-on-surface">Urban Flood</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Location</span>
+                            <span id="inc-loc-val" class="font-data-mono text-data-mono text-on-surface">Near Civil Hospital</span>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">Status</span>
+                            <span id="inc-gate-val" class="font-data-mono text-data-mono text-primary bg-primary-container w-fit px-2 py-0.5 rounded border border-primary">ACCEPTED</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-surface border border-outline-variant rounded">
+                        <span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">Detected Entities & Drivers</span>
+                        <p id="inc-entities-val" class="font-body-sm text-body-sm text-on-surface">37 people at risk, Hospital, Flooded road.</p>
+                    </div>
+                </section>
+
+                <!-- 2. FLOWSHIELD DECISION -->
+                <section class="bg-surface-container-low border border-error-container rounded overflow-hidden relative">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-error animate-pulse"></div>
+                    <div class="bg-error-container p-container-padding flex items-center justify-between border-b border-outline-variant pl-4">
+                        <h2 class="font-headline-sm text-headline-sm font-bold text-on-error-container flex items-center gap-2 uppercase tracking-wide">
+                            <span class="material-symbols-outlined">warning</span>
+                            <span id="inc-decision-p-level">P1 — Life Safety</span>
+                        </h2>
+                        <span class="font-data-mono text-data-mono text-error">FLOWSHIELD DECISION</span>
+                    </div>
+                    <div class="p-container-padding pl-4">
+                        <div class="mb-4">
+                            <h4 id="inc-decision-title" class="font-headline-md text-headline-md font-bold text-on-surface mb-1">Hospital Rescue — W12-C</h4>
+                            <p id="inc-decision-desc" class="font-body-md text-body-md text-on-surface-variant">Hospital access threatened, 37 people at risk, water depth 1.8m.</p>
+                        </div>
+                        <div class="bg-surface p-container-padding rounded border border-outline-variant">
+                            <h5 class="font-label-caps text-label-caps text-on-surface-variant mb-2 uppercase border-b border-outline-variant pb-1">Why this priority? (Life-Safety Drivers)</h5>
+                            <ul id="inc-drivers-list" class="space-y-1 font-data-mono text-data-mono text-error">
+                                <!-- Populated dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+                    <!-- 3. RESOURCE ALLOCATION -->
+                    <section class="bg-surface-container-low border border-outline-variant rounded p-container-padding flex flex-col">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant">
+                            <h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px]">local_shipping</span>
+                                Resource Allocation
+                            </h3>
+                        </div>
+                        <div class="flex-1 flex flex-col gap-4">
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <span class="font-label-caps text-label-caps text-on-surface-variant block">Selected Resource</span>
+                                    <span id="inc-res-name" class="font-headline-sm text-headline-sm font-bold text-primary">Rescue Crew Alpha</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="font-label-caps text-label-caps text-on-surface-variant block">Status & ETA</span>
+                                    <span id="inc-res-eta" class="font-data-mono text-data-mono text-tertiary">Assigned — ETA 0 min</span>
+                                </div>
+                            </div>
+                            <div class="mt-auto bg-surface p-3 rounded border border-outline-variant">
+                                <span class="font-label-caps text-label-caps text-on-surface-variant block mb-1 uppercase">Allocation Reasoning</span>
+                                <p id="inc-res-reasoning" class="font-body-sm text-body-sm text-on-surface-variant">Suitable capability match for P1 life-safety incident. Lowest feasible ETA given current urban flood conditions.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- 4. RECOMMENDED RESPONSE -->
+                    <section class="bg-surface-container-low border border-outline-variant rounded p-container-padding flex flex-col">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant">
+                            <h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px]">rule</span>
+                                Recommended Response
+                            </h3>
+                        </div>
+                        <div class="flex-1">
+                            <ol id="inc-actions-list" class="space-y-2.5 font-data-mono text-data-mono text-on-surface">
+                                <!-- Populated dynamically -->
+                            </ol>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+            <!-- Right Sidebar: Active Queue -->
+            <aside class="w-full xl:w-[320px] bg-surface-container border-l border-outline-variant flex flex-col shrink-0 p-container-padding overflow-y-auto">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-outline-variant">
+                    <h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Active Incident Queue</h2>
+                    <span class="material-symbols-outlined text-primary">monitoring</span>
+                </div>
+                <div id="incidents-queue-list" class="space-y-2 flex-1">
+                    <!-- Populated dynamically -->
+                </div>
+                <button onclick="refreshState()" class="mt-4 w-full py-2 bg-surface-container-highest text-primary font-label-caps text-label-caps uppercase rounded border border-outline-variant hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">refresh</span>
+                    Refresh Incidents
+                </button>
+            </aside>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- TAB 3: RESOURCE MANAGEMENT                                          -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div id="view-resources" class="tab-view hidden flex-1 overflow-auto p-margin-page flex flex-col gap-6">
+            <header class="flex justify-between items-end">
+                <div>
+                    <h2 class="font-headline-lg text-headline-lg mb-1">Resource Fleet Overview</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant">Real-time status of operational assets, assignments, and availability toggles.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="refreshState()" class="px-4 py-2 border border-outline-variant rounded font-label-caps text-label-caps hover:bg-surface-container-highest transition-colors flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm">sync</span> Refresh Fleet
+                    </button>
+                </div>
+            </header>
+
+            <!-- Fleet Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+                <div class="bg-surface-container p-container-padding border border-outline-variant rounded flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-on-surface-variant">
+                        <span class="font-label-caps text-label-caps">Rescue Teams</span>
+                        <span class="material-symbols-outlined text-sm">groups</span>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span id="fleet-rescue-avail" class="font-headline-lg text-headline-lg text-primary">3</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant mb-1">/ 3 Units</span>
+                    </div>
+                    <div class="w-full bg-surface-container-highest h-1 mt-1 rounded overflow-hidden">
+                        <div class="bg-primary h-full" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="bg-surface-container p-container-padding border border-outline-variant rounded flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-on-surface-variant">
+                        <span class="font-label-caps text-label-caps">High-Cap Pumps</span>
+                        <span class="material-symbols-outlined text-sm">water_pump</span>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span id="fleet-pump-avail" class="font-headline-lg text-headline-lg text-tertiary">2</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant mb-1">/ 2 Units</span>
+                    </div>
+                    <div class="w-full bg-surface-container-highest h-1 mt-1 rounded overflow-hidden">
+                        <div class="bg-tertiary h-full" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="bg-surface-container p-container-padding border border-outline-variant rounded flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-on-surface-variant">
+                        <span class="font-label-caps text-label-caps">Engineering / Drains</span>
+                        <span class="material-symbols-outlined text-sm">engineering</span>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span class="font-headline-lg text-headline-lg text-primary">Active</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant mb-1">Auto Desilting</span>
+                    </div>
+                    <div class="w-full bg-surface-container-highest h-1 mt-1 rounded overflow-hidden">
+                        <div class="bg-primary h-full" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="bg-surface-container p-container-padding border border-outline-variant rounded flex flex-col gap-2">
+                    <div class="flex justify-between items-center text-on-surface-variant">
+                        <span class="font-label-caps text-label-caps">Depot Connectivity</span>
+                        <span class="material-symbols-outlined text-sm">local_shipping</span>
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <span class="font-headline-lg text-headline-lg text-primary">Ward 12</span>
+                        <span class="font-body-sm text-body-sm text-on-surface-variant mb-1">Central Depot</span>
+                    </div>
+                    <div class="w-full bg-surface-container-highest h-1 mt-1 rounded overflow-hidden">
+                        <div class="bg-primary h-full" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Layout Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter flex-1 min-h-[400px]">
+                <!-- Table Panel (Spans 2 columns) -->
+                <div class="lg:col-span-2 bg-surface-container border border-outline-variant rounded flex flex-col overflow-hidden">
+                    <div class="p-container-padding border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
+                        <h3 class="font-headline-sm text-headline-sm">Asset Roster</h3>
+                        <span class="font-body-sm text-on-surface-variant">Click any row to view & toggle status</span>
+                    </div>
+                    <div class="overflow-x-auto flex-1">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-surface-container-highest border-b border-outline-variant">
+                                    <th class="p-3 font-label-caps text-label-caps text-on-surface-variant">Resource ID</th>
+                                    <th class="p-3 font-label-caps text-label-caps text-on-surface-variant">Name</th>
+                                    <th class="p-3 font-label-caps text-label-caps text-on-surface-variant">Type</th>
+                                    <th class="p-3 font-label-caps text-label-caps text-on-surface-variant">Status</th>
+                                    <th class="p-3 font-label-caps text-label-caps text-on-surface-variant">Current Zone</th>
+                                    <th class="p-3 font-label-caps text-label-caps text-on-surface-variant text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resources-table-body" class="font-body-sm text-body-sm divide-y divide-outline-variant">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Detail Panel -->
+                <div id="resource-detail-panel" class="bg-surface-container border border-outline-variant rounded flex flex-col">
+                    <div class="p-container-padding border-b border-outline-variant bg-surface-container-high flex justify-between items-center">
+                        <h3 class="font-headline-sm text-headline-sm">Asset Detail</h3>
+                    </div>
+                    <div class="p-container-padding flex-1 flex flex-col gap-4 overflow-auto">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 id="detail-res-id" class="font-headline-lg text-headline-lg text-primary font-data-mono">CREW-ALPHA</h4>
+                                <p id="detail-res-name" class="font-body-sm text-body-sm text-on-surface-variant">Rescue Crew Alpha • Boat, Medic</p>
+                            </div>
+                            <span id="detail-res-status-badge" class="inline-flex items-center gap-1 px-2 py-1 rounded bg-primary-container text-primary text-xs uppercase font-bold tracking-wider border border-primary/20">
+                                Available
+                            </span>
+                        </div>
+                        <hr class="border-outline-variant"/>
+                        <div>
+                            <h5 class="font-label-caps text-label-caps text-on-surface-variant mb-2">Operational Telemetry</h5>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="bg-surface-container-lowest p-2 rounded border border-outline-variant">
+                                    <div class="font-label-caps text-[10px] text-on-surface-variant mb-1">Battery / Readiness</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-primary text-sm">battery_5_bar</span>
+                                        <span class="font-data-mono text-data-mono">96%</span>
+                                    </div>
+                                </div>
+                                <div class="bg-surface-container-lowest p-2 rounded border border-outline-variant">
+                                    <div class="font-label-caps text-[10px] text-on-surface-variant mb-1">Base / Zone</div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="material-symbols-outlined text-on-surface-variant text-sm">near_me</span>
+                                        <span id="detail-res-zone" class="font-data-mono text-data-mono">W12-C</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="font-label-caps text-label-caps text-on-surface-variant mb-2">Capabilities & Equipment</h5>
+                            <ul id="detail-res-caps" class="space-y-1 font-data-mono text-[12px] text-on-surface">
+                                <!-- Populated dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="p-container-padding border-t border-outline-variant bg-surface-container-high">
+                        <button id="btn-toggle-resource" onclick="toggleSelectedResourceStatus()" class="w-full py-2.5 bg-secondary-container text-on-secondary-container font-label-caps text-label-caps uppercase rounded hover:bg-error-container transition-colors border border-on-secondary-container flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">power_settings_new</span>
+                            Toggle Available / Unavailable
                         </button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="timeline-container">
-                <h3>Incident Activity Timeline</h3>
-                <div class="timeline-flow" id="timeline-flow-list">
-                    <!-- Events populated by JS -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- TAB 4: SIMULATION & SCENARIOS                                       -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div id="view-simulation" class="tab-view hidden flex-1 overflow-y-auto p-margin-page relative sim-glow">
+            <!-- SIMULATION MODE BANNER -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-simulation-accent"></div>
+            <div class="mb-gutter bg-surface-container-highest border border-simulation-accent rounded flex items-center p-3 gap-3">
+                <span class="material-symbols-outlined text-simulation-accent animate-pulse">science</span>
+                <div>
+                    <h1 class="font-label-caps text-label-caps text-simulation-accent tracking-widest">SIMULATION MODE ACTIVE</h1>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Hypothetical scenario analysis on isolated deep snapshots. Live operations are NOT affected.</p>
                 </div>
             </div>
-        </section>
 
-        <!-- SECOND COLUMN: Active Incidents & Priority Rankings -->
-        <section class="grid-card col-span-5" id="incidents-card">
-            <div class="card-tabs">
-                <button class="tab-btn active" data-target="active-incidents-tab">
-                    Active Incidents (<span id="active-incidents-count">0</span>)
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                <!-- Left Column: Controls -->
+                <div class="lg:col-span-4 flex flex-col gap-gutter">
+                    <div class="bg-surface-container rounded border border-outline-variant p-container-padding">
+                        <h2 class="font-headline-sm text-headline-sm text-primary mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">construction</span>
+                            Scenario Builder
+                        </h2>
+                        <div class="flex flex-col gap-4">
+                            <div>
+                                <label class="block font-label-caps text-label-caps text-on-surface-variant mb-2">HYPOTHESIS QUERY</label>
+                                <textarea id="sim-query-input" class="w-full bg-surface-container-lowest border border-outline-variant rounded p-3 font-data-mono text-data-mono text-on-surface focus:border-simulation-accent focus:ring-0 resize-none h-24" placeholder="e.g. What happens if Pump Unit A fails?">What happens if Pump Unit A fails?</textarea>
+                            </div>
+                            <div class="border-t border-outline-variant pt-4">
+                                <h3 class="font-label-caps text-label-caps text-on-surface-variant mb-4">SIMULATION PARAMETERS</h3>
+                                <div class="flex flex-col gap-4">
+                                    <div>
+                                        <div class="flex justify-between mb-1">
+                                            <label class="font-body-sm text-body-sm text-on-surface">Target Failed Resource</label>
+                                            <span class="font-data-mono text-data-mono text-simulation-accent" id="sim-target-label">pump-A</span>
+                                        </div>
+                                        <select id="sim-resource-target" onchange="document.getElementById('sim-target-label').textContent = this.value" class="w-full bg-surface-container-lowest border border-outline-variant rounded text-body-sm p-2 text-on-surface focus:border-simulation-accent">
+                                            <option value="pump-A">Pump Unit A — W12 Depot</option>
+                                            <option value="pump-B">Pump Unit B — W12 Depot</option>
+                                            <option value="crew-alpha">Rescue Crew Alpha</option>
+                                            <option value="crew-beta">Rescue Crew Beta</option>
+                                            <option value="crew-gamma">Rescue Crew Gamma</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between mb-1">
+                                            <label class="font-body-sm text-body-sm text-on-surface">Rainfall Surge (mm/hr)</label>
+                                            <span id="slider-rain-val" class="font-data-mono text-data-mono text-simulation-accent">120 mm/hr</span>
+                                        </div>
+                                        <input id="slider-rain" oninput="document.getElementById('slider-rain-val').textContent = this.value + ' mm/hr'" class="w-full h-1 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-simulation-accent" max="200" min="20" type="range" value="120"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="btn-run-sim" onclick="executeSimulation()" class="w-full mt-2 bg-simulation-accent text-white font-label-caps text-label-caps py-3 rounded flex items-center justify-center gap-2 hover:bg-opacity-90 transition-opacity shadow">
+                                <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                                RUN SIMULATION
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Results -->
+                <div class="lg:col-span-8 flex flex-col gap-gutter">
+                    <!-- Top Metrics: Live vs Sim -->
+                    <div class="grid grid-cols-2 gap-gutter">
+                        <div class="bg-surface-container rounded border border-outline-variant p-3 flex flex-col justify-between">
+                            <span class="font-label-caps text-label-caps text-on-surface-variant">CURRENT LIVE STATE (UNMODIFIED)</span>
+                            <div class="flex justify-between items-end mt-2">
+                                <div>
+                                    <span id="sim-live-incs" class="block font-data-mono text-[24px] text-primary">3</span>
+                                    <span class="font-body-sm text-body-sm text-on-surface-variant">Active Incidents</span>
+                                </div>
+                                <div class="text-right">
+                                    <span id="sim-live-gaps" class="block font-data-mono text-[24px] text-[#10b981]">0</span>
+                                    <span class="font-body-sm text-body-sm text-on-surface-variant">Unassigned Gaps</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-surface-container rounded border border-simulation-accent p-3 flex flex-col justify-between relative overflow-hidden">
+                            <div class="absolute inset-0 bg-simulation-accent opacity-5"></div>
+                            <span class="font-label-caps text-label-caps text-simulation-accent relative z-10">SIMULATED OUTCOME</span>
+                            <div class="flex justify-between items-end mt-2 relative z-10">
+                                <div>
+                                    <span id="sim-outcome-assigned" class="block font-data-mono text-[24px] text-simulation-accent flex items-center gap-1">2 <span class="material-symbols-outlined text-[16px]">check</span></span>
+                                    <span class="font-body-sm text-body-sm text-on-surface-variant">Covered Incidents</span>
+                                </div>
+                                <div class="text-right">
+                                    <span id="sim-outcome-gaps" class="block font-data-mono text-[24px] text-error flex items-center justify-end gap-1">1 <span class="material-symbols-outlined text-[16px]">warning</span></span>
+                                    <span class="font-body-sm text-body-sm text-on-surface-variant">Resource Gaps</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations List -->
+                    <div class="bg-surface-container rounded border border-outline-variant p-container-padding">
+                        <h3 class="font-label-caps text-label-caps text-simulation-accent mb-3 border-b border-outline-variant pb-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-[16px]">smart_toy</span>
+                            SIMULATED RESPONSE STRATEGY & ACTIONS
+                        </h3>
+                        <div id="sim-strategy-list" class="flex flex-col gap-2.5">
+                            <!-- Populated dynamically -->
+                            <div class="p-3 bg-surface-container-highest rounded border-l-2 border-simulation-accent font-data-mono text-body-sm text-on-surface">
+                                Click 'RUN SIMULATION' to evaluate hypothetical scenario impacts.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <!-- TAB 5: HISTORY & ACTIVITY LOG                                       -->
+        <!-- ═══════════════════════════════════════════════════════════════════ -->
+        <div id="view-history" class="tab-view hidden flex-1 p-margin-page overflow-y-auto bg-background flex flex-col gap-margin-page">
+            <!-- Filter Bar -->
+            <div class="flex flex-col md:flex-row gap-gutter p-container-padding bg-surface-container border border-outline-variant rounded items-end">
+                <div class="flex-1 flex flex-col gap-stack-tight">
+                    <label class="font-label-caps text-label-caps text-on-surface-variant">Search Filter</label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
+                        <input id="history-search-input" oninput="filterTimeline()" class="w-full bg-surface border border-outline-variant rounded text-body-md pl-8 pr-3 py-1.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Search event type, zone, incident..." type="text"/>
+                    </div>
+                </div>
+                <div class="w-48 flex flex-col gap-stack-tight">
+                    <label class="font-label-caps text-label-caps text-on-surface-variant">Event Type</label>
+                    <select id="history-type-filter" onchange="filterTimeline()" class="w-full bg-surface border border-outline-variant rounded text-body-md px-3 py-1.5 focus:border-primary outline-none">
+                        <option value="all">All Events</option>
+                        <option value="incident">Incident Reports</option>
+                        <option value="resource">Resource Changes</option>
+                        <option value="state">State Updates</option>
+                        <option value="event_ingestion">Scenario Events</option>
+                    </select>
+                </div>
+                <button onclick="refreshState()" class="bg-primary-container text-primary border border-primary/30 font-label-caps text-label-caps px-4 py-1.5 rounded hover:bg-surface-container-highest transition-colors h-[34px] flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px]">refresh</span> Refresh
                 </button>
-                <button class="tab-btn" data-target="prioritization-tab">
-                    Priority Ranking & Explanations
-                </button>
-            </div>
-            
-            <div class="tab-content" id="active-incidents-tab">
-                <div class="situation-summary-panel">
-                    <div class="summary-metric">
-                        <span class="metric-val" id="summary-monitored-zones">0</span>
-                        <span class="metric-lbl">Monitored Zones</span>
-                    </div>
-                    <div class="summary-metric">
-                        <span class="metric-val" id="summary-open-incidents">0</span>
-                        <span class="metric-lbl">Open Incidents</span>
-                    </div>
-                    <div class="summary-metric">
-                        <span class="metric-val critical-text" id="summary-critical-zones">0</span>
-                        <span class="metric-lbl">Critical Zones</span>
-                    </div>
-                </div>
-                <div class="incidents-list" id="active-incidents-list">
-                    <!-- Incidents populated by JS -->
-                </div>
-            </div>
-            
-            <div class="tab-content hidden" id="prioritization-tab">
-                <div class="priority-scoring-list" id="priority-ranking-list">
-                    <!-- Priorities populated by JS -->
-                </div>
-            </div>
-        </section>
-
-        <!-- THIRD COLUMN: Resources & Allocations -->
-        <section class="grid-card col-span-4" id="resources-card">
-            <div class="card-tabs">
-                <button class="tab-btn active" data-target="available-resources-tab">
-                    Available Resources (<span id="available-resources-count">0</span>)
-                </button>
-                <button class="tab-btn" data-target="allocation-actions-tab">
-                    Recommended Allocations
-                </button>
             </div>
 
-            <div class="tab-content" id="available-resources-tab">
-                <div class="resources-list" id="available-resources-list">
-                    <!-- Resources populated by JS -->
-                </div>
-            </div>
-
-            <div class="tab-content hidden" id="allocation-actions-tab">
-                <div class="allocations-container">
-                    <h3>Assignments Made</h3>
-                    <div class="assignments-list" id="optimization-assignments-list">
-                        <!-- Assignments populated by JS -->
+            <!-- Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-gutter flex-1 min-h-0">
+                <!-- Activity Log Table -->
+                <div class="lg:col-span-3 bg-surface border border-outline-variant rounded flex flex-col overflow-hidden">
+                    <div class="grid grid-cols-12 gap-unit px-container-padding py-2.5 bg-surface-container border-b border-outline-variant items-center font-label-caps text-label-caps text-on-surface-variant">
+                        <div class="col-span-3">Timestamp (UTC)</div>
+                        <div class="col-span-2">Type</div>
+                        <div class="col-span-5">Details</div>
+                        <div class="col-span-2 text-right">Severity</div>
                     </div>
-                    
-                    <h3 class="gap-header">Resource gaps (Requires escalation)</h3>
-                    <div class="gaps-list" id="optimization-gaps-list">
-                        <!-- Gaps populated by JS -->
+                    <div id="timeline-rows" class="flex-1 overflow-y-auto divide-y divide-outline-variant/30">
+                        <!-- Populated dynamically -->
                     </div>
                 </div>
-            </div>
-        </section>
-        
-        <!-- FOURTH COLUMN (FULL WIDTH LOWER ROW): WHY Panel & Response Actions -->
-        <section class="grid-card col-span-7" id="why-panel-card">
-            <div class="card-header">
-                <h2>AI Reasoning: "WHY" Explanation Panel</h2>
-                <span class="card-subtitle">Powered by IBM Granite</span>
-            </div>
-            <div class="why-tabs">
-                <button class="why-tab-btn active" data-target="why-situation">Situation Summary</button>
-                <button class="why-tab-btn" data-target="why-priorities">Priority Decisions</button>
-                <button class="why-tab-btn" data-target="why-assignments">Resource Assignments</button>
-                <button class="why-tab-btn" data-target="why-response-plan">Response SOP Plan</button>
-            </div>
-            <div class="why-content-container">
-                <div class="why-tab-content" id="why-situation">
-                    <div class="source-tag" id="why-situation-source">SOURCE: --</div>
-                    <pre class="reasoning-text" id="why-situation-text">Awaiting data...</pre>
-                </div>
-                <div class="why-tab-content hidden" id="why-priorities">
-                    <div class="source-tag" id="why-priorities-source">SOURCE: --</div>
-                    <pre class="reasoning-text" id="why-priorities-text">Awaiting data...</pre>
-                </div>
-                <div class="why-tab-content hidden" id="why-assignments">
-                    <div class="source-tag" id="why-assignments-source">SOURCE: --</div>
-                    <pre class="reasoning-text" id="why-assignments-text">Awaiting data...</pre>
-                </div>
-                <div class="why-tab-content hidden" id="why-response-plan">
-                    <div class="source-tag" id="why-response-plan-source">SOURCE: --</div>
-                    <pre class="reasoning-text" id="why-response-plan-text">Awaiting data...</pre>
-                </div>
-            </div>
-        </section>
 
-        <section class="grid-card col-span-5" id="response-actions-card">
-            <div class="card-header">
-                <h2>Generated Response Plan Actions</h2>
-                <span class="card-subtitle">Operational task list</span>
+                <!-- Statistics Sidebar -->
+                <div class="lg:col-span-1 flex flex-col gap-gutter">
+                    <h3 class="font-label-caps text-label-caps text-on-surface-variant px-1 border-b border-outline-variant pb-2">Shift Metrics (Live)</h3>
+                    <div class="bg-surface-container border border-outline-variant rounded p-container-padding flex flex-col gap-1">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Total Events Logged</span>
+                        <div class="flex items-baseline gap-2">
+                            <span id="metric-total-events" class="font-data-mono text-headline-lg text-on-surface">5</span>
+                            <span class="font-data-mono text-[10px] text-tertiary">Real-time</span>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container border border-outline-variant rounded p-container-padding flex flex-col gap-1">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Decisions Recomputed</span>
+                        <div class="flex items-baseline gap-2">
+                            <span id="metric-recomputed" class="font-data-mono text-headline-lg text-primary">100%</span>
+                            <span class="font-label-caps text-[10px] text-[#10b981]">SYNC REPLAN</span>
+                        </div>
+                    </div>
+                    <div class="bg-surface-container border border-outline-variant rounded p-container-padding flex flex-col gap-1">
+                        <span class="font-body-sm text-body-sm text-on-surface-variant">Engine Latency</span>
+                        <div class="flex items-baseline gap-2">
+                            <span class="font-data-mono text-headline-lg text-primary">~8ms</span>
+                            <span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="actions-table-container">
-                <table class="actions-table">
-                    <thead>
-                        <tr>
-                            <th>Action ID</th>
-                            <th>Incident</th>
-                            <th>Resource</th>
-                            <th>Status</th>
-                            <th>Decision Rationale</th>
-                        </tr>
-                    </thead>
-                    <tbody id="response-actions-tbody">
-                        <!-- Actions populated by JS -->
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        </div>
+
     </main>
-    
-    <footer class="app-footer">
-        <p>&copy; 2026 FlowShield Support Platform - Gujarat Hackathon 2026</p>
-        <span class="footer-build">V1.0.0 (Production Core Engined)</span>
-    </footer>
+</div>
 
-    <script src="script.js"></script>
+<!-- Modal: Clarification Required -->
+<div id="modal-clarify" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
+    <div class="bg-surface-container border border-tertiary rounded max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="flex items-center gap-3 border-b border-outline-variant pb-3">
+            <span class="material-symbols-outlined text-tertiary text-[28px]">contact_support</span>
+            <div>
+                <h3 class="font-headline-sm text-headline-sm text-tertiary">Clarification Required</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Input was ambiguous and requires additional operational details.</p>
+            </div>
+        </div>
+        <div>
+            <span class="font-label-caps text-label-caps text-on-surface-variant block mb-1">Missing Information Checklist:</span>
+            <ul id="clarify-missing-list" class="space-y-1 font-data-mono text-data-mono text-tertiary"></ul>
+        </div>
+        <p id="clarify-prompt-text" class="font-body-sm text-on-surface bg-surface p-3 rounded border border-outline-variant"></p>
+        <textarea id="clarify-input-extra" class="w-full bg-surface-container-lowest border border-outline-variant rounded p-3 text-body-sm resize-none h-20 text-on-surface focus:border-tertiary" placeholder="Provide missing location, water level, or risk details..."></textarea>
+        <div class="flex justify-end gap-3 pt-2">
+            <button onclick="document.getElementById('modal-clarify').classList.add('hidden')" class="px-4 py-2 border border-outline-variant rounded font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface">Dismiss</button>
+            <button onclick="submitClarification()" class="px-5 py-2 bg-tertiary text-on-tertiary font-label-caps text-label-caps rounded font-bold hover:bg-tertiary-fixed transition-colors">Submit Clarification</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Emergency Dispatch -->
+<div id="modal-emergency" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4">
+    <div class="bg-surface-container border border-error rounded max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="flex items-center gap-3 border-b border-outline-variant pb-3">
+            <span class="material-symbols-outlined text-error text-[28px]">emergency_home</span>
+            <div>
+                <h3 class="font-headline-sm text-headline-sm text-error">Direct Emergency Broadcast</h3>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Manually inject critical emergency event across all monitored wards.</p>
+            </div>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <label class="block font-label-caps text-label-caps text-on-surface-variant mb-1">Emergency Text / Scope</label>
+                <textarea id="emergency-text" class="w-full bg-surface-container-lowest border border-outline-variant rounded p-3 text-body-sm resize-none h-20 text-on-surface focus:border-error" placeholder="Describe critical flood incident..."></textarea>
+            </div>
+            <div>
+                <label class="block font-label-caps text-label-caps text-on-surface-variant mb-1">Zone Assignment</label>
+                <select id="emergency-zone" class="w-full bg-surface-container-lowest border border-outline-variant rounded text-body-sm p-2 text-on-surface">
+                    <option value="W12-C">W12-C (Central Hospital & Market)</option>
+                    <option value="W12-N">W12-N (North Residential)</option>
+                    <option value="W12-S">W12-S (South Industrial)</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+            <button onclick="document.getElementById('modal-emergency').classList.add('hidden')" class="px-4 py-2 border border-outline-variant rounded font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface">Cancel</button>
+            <button onclick="submitEmergencyDispatch()" class="px-5 py-2 bg-error text-on-error font-label-caps text-label-caps rounded font-bold hover:bg-error-container transition-colors">Broadcast & Replan</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm"></div>
+
+<script src="script.js"></script>
 </body>
 </html>

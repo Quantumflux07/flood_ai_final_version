@@ -1,29 +1,56 @@
-"""GraniteClient — thin HTTP wrapper for IBM Granite text generation.
+"""GraniteClient — thin HTTP wrapper for IBM Granite / watsonx.ai text generation.
 
 Responsibilities
 ----------------
 - POST to the Granite /v1/text/generation endpoint.
+- Support IAM token exchange when standard IBM Cloud API keys are provided.
 - Raise GraniteUnavailable on any network, timeout, or HTTP error.
 - Never interpret the response — return raw generated text to the caller.
-- Read credentials from environment variables so no secrets appear in code.
+- Read credentials from environment variables / .env file so no secrets appear in code.
 
 Environment variables
 ---------------------
-GRANITE_API_URL   Base URL, e.g. https://us-south.ml.cloud.ibm.com
-GRANITE_API_KEY   IBM Cloud API key (Bearer token)
-GRANITE_MODEL_ID  Model ID (default: ibm/granite-3-8b-instruct)
-
-The client is intentionally minimal.  All prompt engineering lives in
-``prompt_templates.py``, not here.
+GRANITE_API_URL    Base URL, e.g. https://us-south.ml.cloud.ibm.com
+GRANITE_API_KEY    IBM Cloud / watsonx API key
+GRANITE_MODEL_ID   Model ID (default: ibm/granite-3-8b-instruct)
+WATSONX_PROJECT_ID Optional watsonx project GUID
 """
 
 from __future__ import annotations
 
 import json
 import os
+import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
+
+
+def _load_env_file() -> None:
+    """Load variables from .env into os.environ if not already defined."""
+    candidates = [
+        os.path.join(os.getcwd(), ".env"),
+        os.path.join(os.path.dirname(__file__), "..", "..", ".env"),
+    ]
+    for env_path in candidates:
+        if os.path.exists(env_path):
+            try:
+                with open(env_path, encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith("#") or "=" not in line:
+                            continue
+                        k, v = line.split("=", 1)
+                        k, v = k.strip(), v.strip().strip("\"'")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+                break
+            except Exception:
+                pass
+
+
+_load_env_file()
 
 
 class GraniteUnavailable(RuntimeError):
@@ -38,7 +65,7 @@ class GraniteConfig:
     """Runtime configuration for the Granite client.
 
     Reads from environment variables by default so secrets never appear in
-    source code.  Pass explicit values only in tests.
+    source code. Pass explicit values only in tests.
     """
 
     api_url: str = field(
@@ -54,26 +81,61 @@ class GraniteConfig:
             "GRANITE_MODEL_ID", "ibm/granite-3-8b-instruct"
         )
     )
+    project_id: str = field(
+        default_factory=lambda: os.getenv(
+            "WATSONX_PROJECT_ID", os.getenv("GRANITE_PROJECT_ID", "")
+        )
+    )
     timeout_seconds: int = 30
     max_new_tokens: int = 512
     temperature: float = 0.0   # deterministic output — no sampling
 
 
 class GraniteClient:
-    """HTTP client for IBM Granite text generation.
-
-    Usage::
-
-        client = GraniteClient()                    # reads from env
-        client = GraniteClient(GraniteConfig(       # explicit config for tests
-            api_url="http://mock", api_key="test"
-        ))
-
-        text = client.generate(prompt)              # raises GraniteUnavailable on error
-    """
+    """HTTP client for IBM Granite text generation."""
 
     def __init__(self, config: GraniteConfig | None = None) -> None:
         self._cfg = config or GraniteConfig()
+        self._cached_token: str | None = None
+        self._token_expires_at: float = 0.0
+
+    def _get_auth_header(self) -> str:
+        key = self._cfg.api_key.strip()
+        if key.startswith("Bearer ") or key.startswith("ZenApiKey "):
+            return key
+
+        now = time.time()
+        if self._cached_token and now < self._token_expires_at:
+            return f"Bearer {self._cached_token}"
+
+        # Attempt IAM token exchange for IBM Cloud API keys
+        try:
+            iam_url = "https://iam.cloud.ibm.com/identity/token"
+            data = urllib.parse.urlencode({
+                "grant_type": "urn:ibm:params:oauth:grant-type:apikey",
+                "apikey": key,
+            }).encode("utf-8")
+            req = urllib.request.Request(
+                iam_url,
+                data=data,
+                headers={
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "User-Agent": "FlowShield/2.0",
+                },
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                token_data = json.loads(resp.read().decode("utf-8"))
+                access_token = token_data.get("access_token")
+                expires_in = token_data.get("expires_in", 3600)
+                if access_token:
+                    self._cached_token = access_token
+                    self._token_expires_at = now + expires_in - 120
+                    return f"Bearer {access_token}"
+        except Exception:
+            pass
+
+        return f"Bearer {key}"
 
     def generate(self, prompt: str) -> str:
         """Send ``prompt`` to Granite and return the generated text.
@@ -93,7 +155,7 @@ class GraniteClient:
             f"{self._cfg.api_url.rstrip('/')}"
             f"/ml/v1/text/generation?version=2023-05-29"
         )
-        body = json.dumps({
+        payload_dict: dict = {
             "model_id": self._cfg.model_id,
             "input": prompt,
             "parameters": {
@@ -102,15 +164,20 @@ class GraniteClient:
                 "temperature": self._cfg.temperature,
                 "stop_sequences": ["<|end|>"],
             },
-        }).encode()
+        }
+        if self._cfg.project_id:
+            payload_dict["project_id"] = self._cfg.project_id
+
+        body = json.dumps(payload_dict).encode()
 
         req = urllib.request.Request(
             url,
             data=body,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {self._cfg.api_key}",
+                "Authorization": self._get_auth_header(),
                 "Accept": "application/json",
+                "User-Agent": "FlowShield/2.0",
             },
             method="POST",
         )

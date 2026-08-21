@@ -20,7 +20,7 @@ from src.intelligence.models import (
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM_PROMPT = """You are FLOWSHIELD Input Intelligence Gateway.
+_SYSTEM_PROMPT = """You are FLOWSHIELD Input Intelligence Gateway for flood response.
 Analyze the user input and output a valid JSON object with the following schema:
 
 {
@@ -55,13 +55,16 @@ Analyze the user input and output a valid JSON object with the following schema:
 }
 
 RULES:
-1. "earthquake", "wildfire", etc. MUST be intent="unsupported", status="reject".
-2. "what if", "simulate", "what happens if" MUST be intent="simulation", status="accept".
-3. "crew/pump unavailable/offline" MUST be intent="resource_update", status="accept".
-4. "which incident is most urgent", "status", "who is at risk" -> intent="query", status="accept".
-5. Vague inputs like "send help", "urgent" -> intent="clarification_required", status="clarify".
-6. Never invent resource IDs or zone IDs not mentioned or hinted.
-7. Output ONLY the JSON object.
+1. Urban emergencies, waterlogging, trapped people/citizens, rescues, hospital/metro/school
+   incidents, and rainfall MUST be intent="incident", domain="flood_response", status="accept".
+2. Non-flood disasters ("earthquake", "wildfire", "volcano", "stock market", etc.)
+   MUST be intent="unsupported", domain="unsupported", status="reject".
+3. "what if", "simulate", "what happens if" MUST be intent="simulation", status="accept".
+4. "crew/pump unavailable/offline" MUST be intent="resource_update", status="accept".
+5. "which incident is most urgent", "status", "who is at risk" -> intent="query", status="accept".
+6. Vague inputs like "send help", "urgent" -> intent="clarification_required", status="clarify".
+7. Never invent resource IDs or zone IDs not mentioned or hinted.
+8. Output ONLY the JSON object.
 """
 
 
@@ -99,18 +102,31 @@ class GrokInputGateway:
                 raw_json = self._grok.complete(prompt=prompt, system_prompt=_SYSTEM_PROMPT)
                 data = json.loads(raw_json)
 
-                # Construct and validate InputEnvelope
+                intent_enum = InputIntent(data["intent"])
+                status_enum = GateStatus(data["status"])
+                domain = data.get("domain", "flood_response")
+
+                # If accepted operational intent, enforce flood_response domain
+                if intent_enum in (
+                    InputIntent.INCIDENT,
+                    InputIntent.STATE_UPDATE,
+                    InputIntent.RESOURCE_UPDATE,
+                    InputIntent.SIMULATION,
+                    InputIntent.QUERY,
+                ) and status_enum == GateStatus.ACCEPT:
+                    domain = "flood_response"
+
                 envelope = InputEnvelope(
                     raw_input=text,
-                    intent=InputIntent(data["intent"]),
-                    domain=data.get("domain", "flood_response"),
+                    intent=intent_enum,
+                    domain=domain,
                     facts=ExtractedFacts(**data.get("facts", {})),
                     location=data.get("location"),
                     affected_areas=data.get("affected_areas", []),
                     requested_operation=data.get("requested_operation"),
                     missing_information=data.get("missing_information", []),
                     confidence=float(data.get("confidence", 1.0)),
-                    status=GateStatus(data["status"]),
+                    status=status_enum,
                     rejection_reason=data.get("rejection_reason"),
                     clarification_prompt=data.get("clarification_prompt"),
                     source="grok",

@@ -35,7 +35,9 @@ class TestZoneIndependence:
 
     def test_incident_with_unknown_location_resolved_gracefully(self):
         manager = FlowShieldV2Manager()
-        res = manager.execute_input("Flash flood at Riverside Promenade, water is 2 meters deep, 10 people trapped")
+        res = manager.execute_input(
+            "Flash flood at Riverside Promenade, water is 2 meters deep, 10 people trapped"
+        )
         assert res["status"] == "success"
         inc = res["incident"]
         assert inc["location"] == "Riverside Promenade"
