@@ -67,7 +67,7 @@ Emergency coordinators test hypothetical disaster scenarios (*"What happens if P
 
 ---
 
-## Key V2 Capabilities
+## Key Capabilities
 
 ### 🚨 Life-Safety Prioritization
 Identifies incidents where citizens are trapped or critical facilities are endangered, elevating them to top operational priority with transparent driver explanations.
