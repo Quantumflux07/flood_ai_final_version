@@ -6,8 +6,7 @@ FLOWSHIELD helps emergency authorities respond to rapidly changing flood situati
 
 It helps identify who is at risk, determine what requires attention first, allocate available resources, and replan when conditions change.
 
-![FLOWSHIELD V2 Command Center](<img width="1470" height="956" alt="Screenshot 2026-08-22 at 10 34 10 PM" src="https://github.com/user-attachments/assets/175c3953-8d8d-4eaf-a49a-960151916ee8" />
-)
+![FLOWSHIELD V2 Command Center](docs/images/floodshield-v2-dashboard.png)
 
 ---
 
@@ -43,8 +42,7 @@ The main command center monitors multi-zone flood telemetry, active incidents, c
 ### Step 2: Flexible Natural-Language Incident Reporting
 Operators and dispatchers input unformatted field reports (*"heavy floods in Geta nagar"*) directly into the natural-language command gateway without needing to navigate complex manual forms.
 
-![Step 2 — Incident Report Ingestion](<img width="1470" height="956" alt="Screenshot 2026-08-22 at 10 34 39 PM" src="https://github.com/user-attachments/assets/fa04b333-8d80-4a8d-a949-71035e0f38dc" />
-)
+![Step 2 — Incident Report Ingestion](docs/images/02-incident-ingestion.png)
 
 ---
 
