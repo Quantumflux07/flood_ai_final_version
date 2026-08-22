@@ -1,0 +1,68 @@
+{
+  "name": "flowshield",
+  "description": "FlowShield V2 — Modular Agentic Urban Flood Situation & Decision-Support Platform",
+  "version": "2.0.0",
+  "repository": "https://github.com/Quantumflux07/flood_ai_final_version",
+  "keywords": [
+    "flood-response",
+    "emergency-coordination",
+    "decision-support",
+    "agentic-ai",
+    "watsonx",
+    "granite",
+    "grok",
+    "groq",
+    "pydantic"
+  ],
+  "scripts": {
+    "start": "python scripts/serve_dashboard.py",
+    "workflow": "python scripts/run_workflow.py",
+    "test": "pytest"
+  },
+  "env": {
+    "GROK_API_KEY": {
+      "description": "API Key for Grok / Groq Input Intelligence Gateway",
+      "required": false
+    },
+    "GROK_API_URL": {
+      "description": "Base URL for Grok / Groq API (default: https://api.groq.com/openai/v1)",
+      "value": "https://api.groq.com/openai/v1",
+      "required": false
+    },
+    "GROK_MODEL_ID": {
+      "description": "Model ID for natural language input parsing (e.g. openai/gpt-oss-120b)",
+      "value": "openai/gpt-oss-120b",
+      "required": false
+    },
+    "GRANITE_API_KEY": {
+      "description": "IBM Cloud / watsonx.ai API Key for Granite Reasoning Layer",
+      "required": false
+    },
+    "WATSONX_PROJECT_ID": {
+      "description": "IBM watsonx.ai Project GUID",
+      "required": false
+    },
+    "GRANITE_API_URL": {
+      "description": "Base URL for IBM watsonx.ai instance",
+      "value": "https://us-south.ml.cloud.ibm.com",
+      "required": false
+    },
+    "GRANITE_MODEL_ID": {
+      "description": "IBM Granite Model ID",
+      "value": "ibm/granite-3-8b-instruct",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic",
+      "command": "python scripts/serve_dashboard.py"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
