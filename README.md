@@ -6,7 +6,8 @@ FLOWSHIELD helps emergency authorities respond to rapidly changing flood situati
 
 It helps identify who is at risk, determine what requires attention first, allocate available resources, and replan when conditions change.
 
-![FLOWSHIELD V2 Command Center](docs/images/floodshield-v2-dashboard.png)
+![FLOWSHIELD V2 Command Center](<img width="1470" height="956" alt="Screenshot 2026-08-22 at 10 34 10 PM" src="https://github.com/user-attachments/assets/175c3953-8d8d-4eaf-a49a-960151916ee8" />
+)
 
 ---
 
