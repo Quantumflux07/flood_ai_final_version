@@ -1,106 +1,133 @@
-# FlowShield
+# FLOWSHIELD
 
-**Agentic urban flood situation and decision-support platform.**
+### Flood Emergency Coordination & Decision Support
 
-FlowShield is a modular, agentic flood-response intelligence system built for Gujarat Hackathon 2026 (Challenge 7). It takes raw environmental signals (rainfall feeds, citizen reports, drain sensors), builds a shared per-zone situation state, detects incidents, prioritises them, allocates scarce response resources, and generates an explainable, approval-gated response plan.
+FLOWSHIELD helps emergency authorities respond to rapidly changing flood situations by turning fragmented information into prioritized, resource-aware response decisions.
 
-The core design principle: **the deterministic engine decides; the LLM only explains.** IBM Granite summarises, explains and narrates decisions made by transparent, rule-based code — and the whole system degrades gracefully to a fully offline deterministic fallback when no API key is configured.
+It helps identify who is at risk, determine what requires attention first, allocate available resources, and replan when conditions change.
 
-North-star loop:
+![FLOWSHIELD V2 Dashboard](docs/images/floodshield-v2-dashboard.png)
+
+---
+
+## From Information to Action
 
 ```
-Evidence → Situation State → Incidents → Priority → Resource Decision → Action → Outcome → Learning
+Flood Information
+        ↓
+    Understand
+        ↓
+Prioritize Life Safety
+        ↓
+ Allocate Resources
+        ↓
+Coordinate Response
+        ↓
+Replan When Conditions Change
 ```
 
-## Features
+FLOWSHIELD is not just a flood dashboard. It is a decision-support and coordination system that turns raw, incomplete flood signals into actionable, life-safety-first emergency operations.
 
-- **Event ingestion & normalisation** — rainfall, waterlogging, drain-blocked, water-level, road-blocked and resource-status events normalised to a canonical `Evidence` schema.
-- **Situation engine** — per-zone severity matrix (`normal / watch / warning / critical`) built from deterministic IMD-aligned thresholds.
-- **Incident detection** — auto-creates, escalates and resolves incidents from zone severity; deterministic risk score per incident.
-- **Transparent priority scoring** — six weighted factors (severity, critical facilities, road disruption, population impact, response deadline, infrastructure dependency) with a full audit trail of raw values, weights, contributions and reason codes.
-- **Resource allocation** — greedy optimizer assigns available crews/pumps/vehicles to the highest-priority incidents, respecting capability and travel-time constraints; every assignment and every gap carries a reason code.
-- **Response planning agent** — turns priorities + assignments into a structured, policy-grounded action plan with responsible units, response-time targets, human-approval states, and SOP citations from a built-in RAG knowledge base.
-- **Citizen report intake** — free-text flood reports parsed by Granite into structured incidents, with a deterministic regex fallback (unit conversions included).
-- **LLM reasoning with fallback** — five reasoning tasks (situation summary, priority explanation, assignment explanation, response plan, missing-information gaps). Every result is tagged `granite` or `fallback`.
-- **watsonx Orchestrate boundary** — five typed, registerable tools (`ingest_incident`, `calculate_priority`, `optimize_resources`, `generate_response_plan`, `lookup_situation`) with strict Pydantic I/O contracts.
-- **Command dashboard** — browser UI showing situation state, incidents, priorities, allocations, response actions, a WHY panel and an activity timeline, backed by a stdlib HTTP server.
+---
 
-## Tech stack
+## Key V2 Capabilities
 
-| Layer | Choice |
+### 🚨 Life-Safety Prioritization
+Identifies incidents where citizens are trapped or critical facilities are endangered, elevating them to top operational priority with transparent driver explanations.
+
+### 🚜 Resource Allocation
+Matches high-urgency incidents with available, capability-aligned response assets (rescue teams, high-capacity dewatering pumps, heavy vehicles) while accounting for travel time.
+
+### 🔄 Dynamic Replanning
+Automatically recalculates resource assignments and operational plans the moment an asset breaks down, road access changes, or a new critical incident emerges.
+
+### 💬 Flexible Emergency Input
+Allows operators and dispatchers to enter reports naturally (*"37 people trapped near civil hospital in W12-C"*) without requiring rigid form fields.
+
+### 🔍 Explainable Response
+Provides explicit audit trails for every decision—showing exactly why an incident was prioritized and why a specific resource was selected over alternatives.
+
+---
+
+## Example
+
+```
+"37 people are trapped near a hospital and the road is flooded."
+        ↓
+P1 — LIFE SAFETY (Score: 0.98 | Critical Facility & People Trapped)
+        ↓
+Rescue Crew 03 selected (ETA: 8 mins)
+        ↓
+Response plan generated (Approval Required)
+        ↓
+"Crew 03 is unavailable due to mechanical failure"
+        ↓
+FLOWSHIELD replans instantly
+        ↓
+Rescue Crew 02 reallocated & dispatch updated
+```
+
+*The system dynamically adapts in real time as field conditions and asset availability change.*
+
+---
+
+## Architecture
+
+```
+Input
+  ↓
+Input Understanding
+  ↓
+Validation
+  ↓
+Situation State
+  ↓
+Life-Safety Priority
+  ↓
+Resource Allocation
+  ↓
+Response
+  ↓
+Replan
+```
+
+An LLM-based input gateway converts flexible natural-language emergency reports into structured requests before they enter the validated FLOWSHIELD decision pipeline. The current implementation uses the Grok API for this layer with a full offline deterministic fallback.
+
+FLOWSHIELD separates input interpretation from the operational decision engine so future models, data sources, and optimization methods can be introduced without replacing the core.
+
+📖 *Detailed technical documentation:* [docs/V2_ARCHITECTURE.md](docs/V2_ARCHITECTURE.md) | [docs/V2_API_CONTRACT.md](docs/V2_API_CONTRACT.md)
+
+---
+
+## Technology Stack
+
+| Layer | Technology |
 |---|---|
-| Language | Python 3.11+ |
-| Data contracts | Pydantic v2 (strict mode, `extra="forbid"`) |
-| LLM | IBM Granite (`ibm/granite-3-8b-instruct`) |
-| RAG | BM25-style keyword retrieval (stdlib only) |
-| Tests | pytest (586 tests) |
-| Lint | ruff |
-| Dashboard | HTML/CSS/JS + stdlib `http.server` |
+| **Frontend** | HTML5, Tailwind CSS, Material Symbols, Vanilla JavaScript |
+| **Backend** | Python 3.11+, stdlib `ThreadingHTTPServer` (Zero external framework bloat) |
+| **Data Contracts** | Pydantic v2 (Strict validation mode, `extra="forbid"`) |
+| **Input Intelligence** | Grok / Groq API (`openai/gpt-oss-120b`) + Rule-Based NLP Fallback |
+| **Reasoning Layer** | IBM Granite (`ibm/granite-3-8b-instruct`) + Policy Grounding |
+| **Knowledge Engine** | BM25 Inverted Keyword Index (SOP / Policy Corpus) |
+| **Quality & Tests** | pytest (619 tests passing), ruff |
 
-## Repository layout
+---
 
-```
-src/
-  models/         ← Pydantic domain models (stable contracts)
-  engine/         ← Deterministic pipeline stages + priority + optimizer
-  reasoning/      ← Granite LLM layer (client, prompts, fallback)
-  workflow/       ← End-to-end workflow orchestrator + scenario data
-  agents/         ← CitizenIncidentAgent + ResponsePlanningAgent
-  knowledge/      ← RAG knowledge base (SOP / policy corpus)
-  orchestrate/    ← watsonx Orchestrate tool boundary (5 tools + registry)
-  dashboard/      ← Command dashboard frontend (HTML/CSS/JS)
-scripts/
-  run_workflow.py     ← Single-scenario end-to-end runner (no API key needed)
-  serve_dashboard.py  ← Dashboard backend server (port 8000 by default)
-tests/              ← 586 tests across all modules
-```
-
-## Getting started
+## Quick Start
 
 ```bash
-# Install
+# 1. Clone repository
+git clone https://github.com/Quantumflux07/flood_ai_final_version.git
+cd flood_ai_final_version
+
+# 2. Install dependencies
 pip install -e ".[dev]"
 
-# Run all tests
+# 3. Run test suite
 pytest
 
-# Run the end-to-end workflow (uses deterministic fallback — no API key needed)
-python scripts/run_workflow.py
-
-# Lint
-ruff check src/ tests/ scripts/
+# 4. Start the command dashboard
+python scripts/serve_dashboard.py
 ```
 
-### Run the dashboard
-
-```bash
-python scripts/serve_dashboard.py        # default port 8000
-# open http://localhost:8000/
-```
-
-The dashboard loads the Ward 12 heavy-rain scenario on start, lets you submit citizen reports live, and shows the full decision trace plus the WHY panel. Note: on Windows, set `$env:PYTHONIOENCODING="utf-8"` before running scripts that print Unicode.
-
-### IBM Granite
-
-Granite is used for citizen-report extraction and reasoning narratives. It is read from environment variables — the system runs fully offline (deterministic fallback) when the key is absent:
-
-```bash
-export GRANITE_API_URL="https://us-south.ml.cloud.ibm.com"   # default
-export GRANITE_API_KEY="<your-key>"
-export GRANITE_MODEL_ID="ibm/granite-3-8b-instruct"          # default
-```
-
-Every reasoning result is labelled `[GRANITE]` or `[FALLBACK]` so operators always know its provenance.
-
-## Design principles
-
-- **Structured state is the foundation** — situation, incidents, resources, actions and outcomes are typed objects; intelligence modules plug in on top.
-- **Deterministic engine, explainer LLM** — scores, distances and allocations are never computed by the model; Granite only summarises and explains structured facts.
-- **Explainability by construction** — every priority factor, optimizer assignment and resource gap carries machine-readable reason codes and human-readable rationale.
-- **Graceful degradation** — every LLM entry point has a deterministic fallback; the demo never needs a live API key.
-- **Future-proof boundaries** — provider interfaces allow ML risk models, live sensor feeds, and richer citizen channels (voice, image, multilingual) to be swapped in without rewriting the core.
-- **No hardcoded cities** — city is free-text; Ahmedabad and Surat scenario data is configuration, not code.
-
-## Scope boundaries (V1)
-
-Not in scope for V1: production hydrodynamic/ML prediction, live IoT infrastructure, computer vision, GIS command centre, autonomous dispatch, mobile apps, voice/multichannel intake, and database persistence (state is in-memory by design).
+Open **`http://localhost:8000/`** in your browser to access the FLOWSHIELD V2 Command Center.
